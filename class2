@@ -1,0 +1,11 @@
+Hbase Architecture
+
+commands
+for creating table
+- create 'customer','address','order'
+- this cmd creates table customer with columns address,order.
+
+for inserting data in table.
+-put 'customer','Bhatu','address:city','Pune'
+-this cmd writes data in table as 
+-inside customer table for customer -Bhatu add is city-pune
