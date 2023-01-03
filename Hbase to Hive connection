@@ -1,0 +1,55 @@
+for connecting Hbase to Hive for data migration bet them follows the steps
+ 1- first create table in Hbase - test_flight_delays with column families dims and measures
+   - create 'test_fligh_delays','dims','measures'
+   
+ 2- create Hive table with HBase storage handler
+   -CREATE EXTERNAL TABLE IF not exists hbase_flight_delays
+    (key string,
+    carrier string,
+    distance int
+     )
+    ROW FORMAT DELIMITED
+    FIELDS TERMINATED BY ','
+    STORED BY 'org.apache.hadoop.hive.hbase.HBaseStorageHandler'
+    WITH SERDEPROPERTIES
+    ("hbase.columns.mapping"=":key,dims:carrier,measures:distance")
+    TBLPROPERTIES("hbase.table.name"="test_flight_delays")
+    ;
+3 - then create hive stage data
+   - CREATE EXTERNAL TABLE IF not exists hbase_stg_flight_delays
+     (key string,
+     carrier string,
+     distance int
+     )
+     ROW FORMAT DELIMITED
+     FIELDS TERMINATED BY ','
+     ;
+     
+4 - then create file or import it in cloudera 
+  - vim testdata_hbase.csv
+    1,hyd,10000
+    2,blr,20000
+    3,pune,30000 ......save it by :wq!
+    
+    
+5- copy(testdata_hbase.csv) this file in tmp
+  -cp testdata_hbase.csv /tmp/hive_class/
+  
+  
+6 - Load data into Hives stage table 
+   - load data local inpath 'file:///tmp/hive_class/testdata_hbase.csv' into table hbase_stg_flight_delays;
+   
+   
+7- insert data from stage table into main or connected table.
+  - insert into table hbase_flight_delays select * from hbase_stg_flight_delays;
+   
+NOW DATA IS PLACED IN HIVE BUT IT ALSO PRESENT IN HBASE TABLE.
+
+IF THE IS INSERTED IN HBASE TABLE IT ALSO UPDATED IN HIVE TABLE.
+   
+   
+   
+   
+   
+   
+   
