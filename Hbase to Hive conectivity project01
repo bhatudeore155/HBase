@@ -1,0 +1,72 @@
+create project on connectivity bet Hbase and Hive
+
+1 create table covid in Hbase
+  - create 'covid','group','stage'
+
+2 create Hive table 
+  CREATE EXTERNAL TABLE IF not exists covid
+  (
+  key string,
+  name string,
+  level string
+  )
+  row format delimited
+  fields terminated by ','
+  STORED BY 'org.apache.hadoop.hive.hbase.HBaseStorageHandler'
+  WITH SERDEPROPERTIES
+  ("hbase.columns.mapping"=":key,group:name,stage:level")
+  TBLPROPERTIES("hbase.table.name"="covid")
+  ;
+
+
+* create stg table 
+CREATE EXTERNAL TABLE IF not exists stg_covid
+  (
+  key string,
+  name string,
+  level string
+  )
+  row format delimited
+  fields terminated by ',';
+
+
+3 create file in local
+  vim covid.csv
+  1,omicron,serious
+  2,alpha,mild
+  3,beta,seveour
+  4,gamma,mild
+  5,delta,serious
+
+4 copy it into tmp
+ - cp covid.csv /tmp/hive_class/
+
+5 load data into hive stg table 
+  -load data local inpath 'file:///tmp/hive_class/covid.csv' into table stg_covid;
+
+6 insert data from stg table into main table 
+  - insert into table covid select * from stg_covid;
+
+7 test whether data is inserted or not
+  -select * from covid
+
+  output-
+   select * from covid;
+OK
+1       omicron serious
+2       alpha   mild
+3       beta    seveour
+4       gamma   mild
+5       delta   serious
+Time taken: 0.865 seconds, Fetched: 5 row(s)
+
+after updating record in Hbase it shows in hive.
+hive> select * from covid;
+OK
+1       omicron serious
+2       alpha   mild
+3       beta    seveour
+4       gamma   mild
+5       delta   serious
+6       srv     less_serious
+Time taken: 0.227 seconds, Fetched: 6 row(s)
